@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WML Learn | Dashboard Instruktur LMS</title>
+  <link rel="stylesheet" href="index.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Dashboard Pengelolaan Modul dan Pembuatan Kursus Baru - Workshop MSD - Learning Management System (WML)">
+  <meta name="author" content="Faisal Akbar">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header Section -->
+    <header>
+      <div class="logo-container">
+        <div class="logo-icon">W</div>
+        <div class="logo-text">
+          <h1>WML Learn</h1>
+          <p>Workshop MSD - LMS</p>
+        </div>
+      </div>
+      
+      <!-- User Profile (Instructor Faisal Akbar) -->
+      <div class="user-profile">
+        <div class="avatar">FA</div>
+        <div class="user-info">
+          <div class="name">Faisal Akbar</div>
+          <div class="role">Pengajar (Trainer)</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Metrics Dashboard -->
+    <section class="metrics-grid" aria-label="Ringkasan Metrik Pengajar">
+      <div class="metric-card total">
+        <div class="metric-data">
+          <h3>Total Kursus</h3>
+          <div class="value" id="countTotal">0</div>
+        </div>
+        <div class="metric-icon">📚</div>
+      </div>
+      
+      <div class="metric-card published">
+        <div class="metric-data">
+          <h3>Kursus Aktif</h3>
+          <div class="value" id="countPublished">0</div>
+        </div>
+        <div class="metric-icon">🚀</div>
+      </div>
+      
+      <div class="metric-card draft">
+        <div class="metric-data">
+          <h3>Simpanan Draf</h3>
+          <div class="value" id="countDraft">0</div>
+        </div>
+        <div class="metric-icon">📁</div>
+      </div>
+    </section>
+
+    <!-- Main Content Area -->
+    <main class="main-section" aria-label="Manajemen Kursus Saya">
+      <div class="section-header">
+        <div class="title-area">
+          <h2>Kursus Saya</h2>
+          <p class="subtitle">Kelola materi belajar, video, dan dokumen Anda</p>
+        </div>
+        
+        <div class="header-actions">
+          <!-- Tab Switcher -->
+          <div class="tab-switcher" role="tablist">
+            <button class="tab-btn active" id="tabAll" role="tab" aria-selected="true">Semua</button>
+            <button class="tab-btn" id="tabPublished" role="tab" aria-selected="false">Aktif</button>
+            <button class="tab-btn" id="tabDraft" role="tab" aria-selected="false">Draf</button>
+          </div>
+
+          <!-- Create Course Button -->
+          <button class="btn btn-primary" onclick="openCreateModal()">
+            <span class="btn-icon">+</span> Buat Kursus Baru
+          </button>
+        </div>
+      </div>
+
+      <!-- Course Grid List -->
+      <div class="courses-grid" id="coursesGrid">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2026 WML Learn - Workshop MSD LMS. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- Create Course Dialog Modal -->
+  <dialog id="createCourseModal" closedby="any" aria-labelledby="modalTitle">
+    <div class="dialog-header">
+      <div class="dialog-title-group">
+        <span class="modal-badge">WML-5</span>
+        <h3 id="modalTitle">Buat Modul Kursus Baru</h3>
+      </div>
+      <button class="close-btn" onclick="closeCreateModal()" aria-label="Tutup modal">&times;</button>
+    </div>
+    
+    <form id="createCourseForm">
+      <div class="dialog-body">
+        <!-- Course Title -->
+        <div class="form-group">
+          <label for="courseTitle">Nama Kursus <span class="required">*</span></label>
+          <input type="text" id="courseTitle" placeholder="Contoh: Belajar HTML & CSS Dasar untuk Pemula" required autocomplete="off">
+        </div>
+
+        <!-- Course Description -->
+        <div class="form-group">
+          <label for="courseDesc">Deskripsi Kursus <span class="required">*</span></label>
+          <textarea id="courseDesc" placeholder="Jelaskan secara ringkas materi yang akan dipelajari di kursus ini..." required autocomplete="off"></textarea>
+        </div>
+
+        <!-- Video Upload Dropzone -->
+        <div class="form-group">
+          <label>Unggah Video Pembelajaran (MP4) <span class="required">*</span></label>
+          <div class="dropzone" id="videoDropZone">
+            <input type="file" id="videoFile" accept="video/mp4" style="display: none;">
+            <div class="dropzone-content">
+              <span class="dropzone-icon">🎬</span>
+              <p class="dropzone-text">Tarik & lepas file video MP4 di sini, atau <span class="browse-link">cari file</span></p>
+              <p class="file-info-label" id="videoFileInfo">Maksimum ukuran 100MB (Wajib .mp4)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PDF Upload Dropzone -->
+        <div class="form-group">
+          <label>Unggah Materi Pembelajaran (PDF) <span class="required">*</span></label>
+          <div class="dropzone" id="pdfDropZone">
+            <input type="file" id="pdfFile" accept="application/pdf" style="display: none;">
+            <div class="dropzone-content">
+              <span class="dropzone-icon">📄</span>
+              <p class="dropzone-text">Tarik & lepas dokumen PDF di sini, atau <span class="browse-link">cari file</span></p>
+              <p class="file-info-label" id="pdfFileInfo">Maksimum ukuran 20MB (Wajib .pdf)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Simulated Progress Tracker (Hidden by default) -->
+        <div class="progress-section" id="progressSection" style="display: none;">
+          <h4>Proses Mengunggah Berkas</h4>
+          
+          <!-- Video Progress -->
+          <div class="progress-item" id="videoProgressItem">
+            <div class="progress-meta">
+              <span class="file-name" id="progressVideoName">video.mp4</span>
+              <span class="percent" id="videoPercent">0%</span>
+            </div>
+            <div class="progress-bar-wrapper">
+              <div class="progress-bar-fill" id="videoProgressBar" style="width: 0%;"></div>
+            </div>
+            <div class="progress-status" id="videoProgressStatus">Menunggu antrean...</div>
+          </div>
+
+          <!-- PDF Progress -->
+          <div class="progress-item" id="pdfProgressItem">
+            <div class="progress-meta">
+              <span class="file-name" id="progressPdfName">document.pdf</span>
+              <span class="percent" id="pdfPercent">0%</span>
+            </div>
+            <div class="progress-bar-wrapper">
+              <div class="progress-bar-fill" id="pdfProgressBar" style="width: 0%;"></div>
+            </div>
+            <div class="progress-status" id="pdfProgressStatus">Menunggu antrean...</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dialog-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btnSubmitForm">Simpan sebagai Draf</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Notification Toast -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
