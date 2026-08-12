@@ -1,0 +1,67 @@
+name: Build and Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+      - development
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }} # Target GCP Project ID configured in GitHub Secrets
+  GCP_REGION: asia-southeast2                  # Jakarta Region (Recommended for Indonesian users)
+  GAR_REPOSITORY: wml-lms-registry             # Google Artifact Registry repository name
+
+jobs:
+  deploy:
+    name: Build & Deploy to Cloud Run
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the source code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Authenticate to Google Cloud
+      # Supports both Workload Identity Federation (modern) and Service Account Key JSON (classic)
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }} # Google Service Account Key JSON in GitHub Secrets
+
+      # Step 3: Setup Google Cloud SDK
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # Step 4: Configure Docker authentication for Artifact Registry
+      - name: Configure Docker Auth
+        run: |
+          gcloud auth configure-docker ${{ env.GCP_REGION }}-docker.pkg.dev --quiet
+
+      # Step 5: Dynamically determine Service Name and Image Tag based on the active branch
+      - name: Set Environment Variables by Branch
+        id: set-env
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "SERVICE_NAME=wml-lms-production" >> $GITHUB_ENV
+            echo "IMAGE_TAG=prod-${{ github.sha }}" >> $GITHUB_ENV
+          else
+            echo "SERVICE_NAME=wml-lms-development" >> $GITHUB_ENV
+            echo "IMAGE_TAG=dev-${{ github.sha }}" >> $GITHUB_ENV
+          fi
+
+      # Step 6: Build and Push Docker Image to Google Artifact Registry
+      - name: Build and Push Docker Image
+        run: |
+          IMAGE_PATH="${{ env.GCP_REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.GAR_REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ env.IMAGE_TAG }}"
+          docker build -t "$IMAGE_PATH" .
+          docker push "$IMAGE_PATH"
+          echo "DEPLOYED_IMAGE_PATH=$IMAGE_PATH" >> $GITHUB_ENV
+
+      # Step 7: Deploy the Container Image to Google Cloud Run
+      - name: Deploy to Google Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: ${{ env.SERVICE_NAME }}
+          image: ${{ env.DEPLOYED_IMAGE_PATH }}
+          region: ${{ env.GCP_REGION }}
+          flags: '--allow-unauthenticated' # Allows public web access to the dashboard
