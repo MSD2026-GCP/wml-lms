@@ -10,6 +10,7 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: asia-southeast2
   ARTIFACT_REGISTRY: asia-southeast2-docker.pkg.dev
+  PROJECT_KEY: wml
   IMAGE_NAME: wml-lms
 
 jobs:
@@ -29,11 +30,11 @@ jobs:
         id: set-env
         run: |
           if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "service_name=cdaras-dashboard-prod" >> $GITHUB_OUTPUT
+            echo "service_name=${{ env.PROJECT_KEY }}-dashboard-prod" >> $GITHUB_OUTPUT
             echo "environment=production"             >> $GITHUB_OUTPUT
             echo "image_tag=prod-${{ github.sha }}"  >> $GITHUB_OUTPUT
           else
-            echo "service_name=cdaras-dashboard-dev" >> $GITHUB_OUTPUT
+            echo "service_name=${{ env.PROJECT_KEY }}-dashboard-dev" >> $GITHUB_OUTPUT
             echo "environment=staging"               >> $GITHUB_OUTPUT
             echo "image_tag=dev-${{ github.sha }}"   >> $GITHUB_OUTPUT
           fi
@@ -74,7 +75,7 @@ jobs:
       - name: Build and push Docker image
         id: build-push
         run: |
-          IMAGE_URI="${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/cdaras/${{ env.IMAGE_NAME }}:${{ needs.setup-env.outputs.image_tag }}"
+          IMAGE_URI="${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.PROJECT_KEY }}/${{ env.IMAGE_NAME }}:${{ needs.setup-env.outputs.image_tag }}"
 
           docker build \
             --tag "$IMAGE_URI" \
@@ -117,7 +118,7 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ needs.setup-env.outputs.service_name }}
-          image: "${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/cdaras/${{ env.IMAGE_NAME }}:${{ needs.setup-env.outputs.image_tag }}"
+          image: "${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.PROJECT_KEY }}/${{ env.IMAGE_NAME }}:${{ needs.setup-env.outputs.image_tag }}"
           region: ${{ env.REGION }}
           flags: >-
             --allow-unauthenticated
@@ -163,7 +164,7 @@ jobs:
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: ${{ needs.setup-env.outputs.service_name }}
-          image: "${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/cdaras/${{ env.IMAGE_NAME }}:${{ needs.setup-env.outputs.image_tag }}"
+          image: "${{ env.ARTIFACT_REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.PROJECT_KEY }}/${{ env.IMAGE_NAME }}:${{ needs.setup-env.outputs.image_tag }}"
           region: ${{ env.REGION }}
           flags: >-
             --allow-unauthenticated
