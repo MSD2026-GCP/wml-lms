@@ -1,5 +1,7 @@
 # WML Learn - Dashboard Instruktur LMS 🎓
 
+updated Aug 19th 2026
+
 [![Jira Key](https://img.shields.io/badge/Jira-WML--5-blue?style=for-the-badge&logo=jira)](https://mii-team-pvqkohd7.atlassian.net)
 [![Status](https://img.shields.io/badge/Status-DRAFT-amber?style=for-the-badge)](https://github.com/makbarmii/wml-lms)
 [![PRD](https://img.shields.io/badge/Confluence-WML--PRD-indigo?style=for-the-badge&logo=confluence)](https://mii-team-pvqkohd7.atlassian.net)
